@@ -271,3 +271,497 @@ html {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* File Manager Styles */
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px 16px;
+    text-align: left;
+    font-size: 0.875rem;
+    color: #374151;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.context-menu-item:hover {
+    background-color: #f9fafb;
+}
+
+.context-menu-item svg {
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+/* Drag and drop styles */
+#drop-zone-overlay {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+#drop-zone-overlay .drop-zone-content {
+    animation: dropZoneScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes dropZoneScale {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* File manager sidebar animations */
+#file-manager-sidebar {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#file-manager-overlay {
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* File item hover effects */
+.file-item {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.file-item:hover {
+    transform: translateX(2px);
+}
+
+/* Notification animations */
+.notification-enter {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+.notification-enter-active {
+    transform: translateX(0);
+    opacity: 1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.notification-exit {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification-exit-active {
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glassmorphism effects for file manager */
+.glass {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Custom scrollbar for file manager */
+#file-manager-sidebar ::-webkit-scrollbar {
+    width: 6px;
+}
+
+#file-manager-sidebar ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+#file-manager-sidebar ::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 3px;
+}
+
+#file-manager-sidebar ::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.5);
+}
+
+/* File upload progress */
+.upload-progress {
+    animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Files button styles */
+#files-toggle-btn {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+#files-toggle-btn:active {
+    transform: scale(0.95) translateZ(0);
+}
+
+/* Professional File Manager - Force Smooth Transitions */
+main {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    will-change: width;
+}
+
+footer {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    will-change: width;
+}
+
+#chat-container {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    will-change: width;
+}
+
+.container {
+    transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important, padding 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    will-change: max-width, padding;
+}
+
+/* Force transitions on layout elements */
+body.files-panel-open main,
+body.files-panel-open footer,
+body.files-panel-open #chat-container,
+body.files-panel-open .container {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+#files-panel {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1), -1px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+#files-panel.bg-purple-50 {
+    background-color: rgba(245, 243, 255, 0.8) !important;
+}
+
+/* File Attachments */
+.file-attachments-container {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Professional File Manager - Selection & Bulk Operations */
+.file-item.selected {
+    background-color: rgba(147, 51, 234, 0.1) !important;
+    border-color: rgba(147, 51, 234, 0.3) !important;
+}
+
+.file-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.file-item.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+}
+
+.folder-drop-target {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+    border-style: dashed !important;
+}
+
+/* Bulk Operations Toolbar */
+#bulk-operations {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+}
+
+#bulk-operations button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+#bulk-operations button:not(:disabled):hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+/* Selection Checkbox Animation */
+.file-item .w-5.h-5 {
+    transition: all 0.2s ease;
+}
+
+.file-item:hover .w-5.h-5 {
+    border-color: rgba(147, 51, 234, 0.6);
+    transform: scale(1.1);
+}
+
+/* Drag and Drop Visual Feedback */
+.file-item[draggable="true"]:hover {
+    cursor: grab;
+}
+
+.file-item[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+/* Multi-select Range Visual */
+.file-item.in-selection-range {
+    background-color: rgba(147, 51, 234, 0.05);
+    border-color: rgba(147, 51, 234, 0.2);
+}
+
+/* Keyboard Focus States */
+.file-item:focus-within {
+    outline: 2px solid rgba(147, 51, 234, 0.5);
+    outline-offset: 2px;
+}
+
+/* Smooth Transitions */
+.file-item,
+.file-item *,
+#bulk-operations,
+#bulk-operations * {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Selection Mode Active State */
+#files-panel.selection-mode-active {
+    border-left: 3px solid rgba(147, 51, 234, 0.6);
+    background-color: rgba(147, 51, 234, 0.02);
+}
+
+#files-panel.selection-mode-active .file-item {
+    cursor: pointer;
+}
+
+#files-panel.selection-mode-active .file-item:hover {
+    background-color: rgba(147, 51, 234, 0.05);
+    border-color: rgba(147, 51, 234, 0.2);
+}
+
+.file-attachment {
+    transition: all 0.2s ease;
+}
+
+.file-attachment:hover {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.file-attachment .remove-attachment {
+    transition: all 0.2s ease;
+}
+
+.file-attachment .remove-attachment:hover {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    transform: scale(1.1);
+}
+
+.file-item {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+.file-item:hover {
+    transform: translateY(-1px) translateZ(0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Files panel open state */
+.files-panel-open .flex-1.overflow-hidden {
+    width: 50% !important;
+    transition: width 300ms ease-out !important;
+}
+
+.files-panel-open #chat-messages {
+    max-width: 100% !important;
+}
+
+.files-panel-open footer {
+    width: 50% !important;
+    transition: width 300ms ease-out !important;
+}
+
+/* Profile panel open state */
+.profile-panel-open .flex-1.overflow-hidden {
+    width: 50% !important;
+    transition: width 300ms ease-out !important;
+}
+
+.profile-panel-open #chat-messages {
+    max-width: 100% !important;
+}
+
+.profile-panel-open footer {
+    width: 50% !important;
+    transition: width 300ms ease-out !important;
+}
+
+/* Default state transitions */
+.flex-1.overflow-hidden {
+    transition: width 300ms ease-out;
+}
+
+footer {
+    transition: width 300ms ease-out;
+}
+
+/* Universal Panel Styles - Egységes panel rendszer */
+.side-panel {
+    position: fixed;
+    top: 4rem; /* Header magassága (64px) */
+    right: -50%;
+    width: 50%;
+    height: calc(100vh - 4rem); /* Teljes magasság mínusz header */
+    background: white;
+    border-left: 1px solid #e5e7eb;
+    transform: translateX(0);
+    transition: right 300ms ease-out;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-panel.open {
+    right: 0;
+}
+
+/* Panel Header - Egységes fejléc minden panelhez */
+.panel-header {
+    flex-shrink: 0;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f3f4f6;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Panel Content - Scrollolható tartalom */
+.panel-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0; /* Fontos a flexbox scrollinghoz */
+}
+
+/* Custom Scrollbar - Minden panelhez */
+.panel-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+}
+
+.panel-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 3px;
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.5);
+}
+
+/* Legacy scrollbar support */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.5);
+}
+
+body.files-panel-open .container {
+    max-width: 56rem !important; /* Equivalent to max-w-4xl (896px) */
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+}
+
+/* Message width constraints are preserved by not overriding them */
+
+/* File context menu */
+#file-context-menu {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.menu-item {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+.menu-item:hover {
+    transform: scale(1.02) translateZ(0);
+}
+
+.menu-item:active {
+    transform: scale(0.98) translateZ(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #file-manager-sidebar {
+        width: 100vw;
+        max-width: 100vw;
+    }
+    
+    #files-button {
+        position: fixed;
+        top: auto;
+        bottom: 24px;
+        right: 24px;
+        z-index: 30;
+    }
+    
+    .file-item {
+        padding: 16px 12px;
+    }
+    
+    .file-item:hover {
+        transform: none;
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+}

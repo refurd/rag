@@ -27,10 +27,24 @@ document.addEventListener('DOMContentLoaded', function() {
     window.socket = socket; // Make socket globally available
     
     // Get DOM elements
-    const chatContainer = document.getElementById('chat-container');
+    const chatContainer = document.getElementById('chat-container'); // Content container
+    const chatMessages = document.getElementById('chat-messages'); // Scrollable main element
     const userInput = document.getElementById('user-input');
-    window.chatContainer = chatContainer; // Make globally available
+    
+    // Make globally available - chatContainer should point to the content container for appending
+    // but chatMessages should be used for scrolling
+    window.chatContainer = chatContainer;
+    window.chatMessages = chatMessages;
     window.userInput = userInput;
+    
+    // Note: Smooth scroll is now handled by scroll-to-bottom.js
+    // This is kept as fallback only
+    setTimeout(() => {
+        if (!window.smoothScrollToBottom && chatMessages) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            console.log('Fallback scroll on page load');
+        }
+    }, 1000);
     
     // Setup Socket.IO event listeners
     socket.on('stream', handleStreamMessage);

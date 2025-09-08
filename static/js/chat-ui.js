@@ -78,7 +78,14 @@ function addMessage(role, content, messageId = null) {
         }
     }, 100);
     
-    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    // Smooth scroll to bottom after adding message
+    setTimeout(() => {
+        if (window.scrollToBottomFast) {
+            window.scrollToBottomFast();
+        } else if (window.smoothScrollToBottom) {
+            window.smoothScrollToBottom(600);
+        }
+    }, 50);
     
     // Add event listeners
     setupMessageEventListeners(messageDiv, content, messageIdValue);
@@ -201,6 +208,45 @@ function showCopyFeedback(button) {
 
 // Make it globally available
 window.showCopyFeedback = showCopyFeedback;
+
+// Add system message for file uploads
+function addSystemMessage(message) {
+    const chatMessages = document.getElementById('chat-messages');
+    if (!chatMessages) return;
+    
+    const systemMessageDiv = document.createElement('div');
+    systemMessageDiv.className = 'message scroll-reveal gpu-accelerated system-message';
+    systemMessageDiv.dataset.role = 'system';
+    
+    systemMessageDiv.innerHTML = `
+        <div class="flex justify-center mb-4">
+            <div class="bg-purple-50/80 backdrop-blur-sm border border-purple-200/50 rounded-2xl px-4 py-2 shadow-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="w-4 h-4 bg-purple-100 rounded-full flex items-center justify-center">
+                        <svg class="w-2.5 h-2.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <p class="text-sm text-purple-800 font-medium">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    chatMessages.appendChild(systemMessageDiv);
+    
+    // Trigger scroll reveal animation
+    setTimeout(() => {
+        systemMessageDiv.classList.add('revealed');
+    }, 100);
+    
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Make it globally available
+window.addSystemMessage = addSystemMessage;
 
 // Create AI message container for streaming
 function createAIMessageContainer() {

@@ -27,11 +27,34 @@ function sendMessage() {
     // Setup event listeners for AI message buttons
     setupAIMessageEventListeners(window.currentAIMessage);
 
+    // Prepare message with file context if available
+    let messageWithContext = message;
+    let fileContext = [];
+    
+    if (window.chatFileContext && window.chatFileContext.length > 0) {
+        fileContext = window.chatFileContext;
+        
+        // Add file context to message
+        const fileContextText = fileContext.map(file => 
+            `\n\n--- File: ${file.fileName} ---\n${file.content}\n--- End of ${file.fileName} ---`
+        ).join('');
+        
+        messageWithContext = `${message}${fileContextText}`;
+        
+        // Clear file attachments after sending
+        const attachmentContainer = document.getElementById('file-attachments');
+        if (attachmentContainer) {
+            attachmentContainer.remove();
+        }
+        window.chatFileContext = [];
+    }
+    
     // Emit message to server
     socket.emit('send_message', {
         user_id: window.userId,
-        message: message,
-        message_id: userMessageId
+        message: messageWithContext,
+        message_id: userMessageId,
+        file_context: fileContext.length > 0 ? fileContext : null
     });
 }
 

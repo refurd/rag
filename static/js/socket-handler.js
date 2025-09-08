@@ -48,7 +48,10 @@ function handleStreamMessage(data) {
         }
         
         // Auto-scroll to keep the latest content visible
-        targetMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        // Fast scroll during streaming to keep up
+        if (window.scrollToBottomFast) {
+            window.scrollToBottomFast();
+        }
     }
     
     // Handle completion
@@ -158,7 +161,12 @@ function handleMessageUpdate(data) {
             } else {
                 contentDiv.textContent = data.new_content;
             }
-            messageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            // Smooth scroll after message update
+            setTimeout(() => {
+                if (window.scrollToBottomFast) {
+                    window.scrollToBottomFast();
+                }
+            }, 100);
         }
     }
 }
@@ -167,6 +175,9 @@ function handleMessageUpdate(data) {
 function handleConnection(data) {
     console.log('Connected to server with ID:', data.user_id);
     window.userId = data.user_id;
+    
+    // Trigger custom event for scroll helper
+    document.dispatchEvent(new CustomEvent('socketConnected'));
     
     // Clear any existing messages except the welcome message
     const messages = document.querySelectorAll('.message:not(.welcome-message)');
@@ -182,8 +193,19 @@ function handleConnection(data) {
             }
         });
         
-        // Scroll to the bottom after loading messages
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        // Smooth scroll to bottom after loading messages
+        setTimeout(() => {
+            if (window.scrollToBottomSlow) {
+                window.scrollToBottomSlow(); // Slower, more elegant scroll after loading
+            }
+        }, 200);
+    } else {
+        // Even if no messages, scroll to bottom
+        setTimeout(() => {
+            if (window.scrollToBottomSlow) {
+                window.scrollToBottomSlow();
+            }
+        }, 200);
     }
 }
 

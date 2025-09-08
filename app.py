@@ -1,10 +1,11 @@
 import os
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, send_file
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from openai import OpenAI
 from dotenv import load_dotenv
 import uuid
 from collections import defaultdict
+from file_manager import FileManager
 
 # Load environment variables
 load_dotenv()
@@ -37,6 +38,9 @@ client = OpenAI(api_key=api_key)
 conversations = {}
 # Store message history with IDs
 message_history = defaultdict(list)
+
+# Initialize file manager
+file_manager = FileManager()
 
 @app.route('/')
 def home():
@@ -267,5 +271,112 @@ def handle_update_message(data):
         print(f"Error updating message: {str(e)}")
         emit('error', {'message': 'Failed to update message'}, room=user_id)
 
+# File Manager Routes
+@app.route('/api/files', methods=['GET'])
+def list_files():
+    """List files in directory"""
+    path = request.args.get('path', '')
+    result, status_code = file_manager.list_directory(path)
+    return jsonify(result), status_code
+
+@app.route('/api/files/upload', methods=['POST'])
+def upload_file():
+    """Upload a file"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    
+    file = request.files['file']
+    path = request.form.get('path', '')
+    
+    result, status_code = file_manager.upload_file(file, path)
+    return jsonify(result), status_code
+
+@app.route('/api/files/folder', methods=['POST'])
+def create_folder():
+    """Create a new folder"""
+    data = request.get_json()
+    path = data.get('path', '')
+    folder_name = data.get('name', '')
+    
+    if not folder_name:
+        return jsonify({'error': 'Folder name is required'}), 400
+    
+    result, status_code = file_manager.create_folder(path, folder_name)
+    return jsonify(result), status_code
+
+@app.route('/api/files/<path:file_path>', methods=['DELETE'])
+def delete_file(file_path):
+    """Delete a file or folder"""
+    result, status_code = file_manager.delete_item(file_path)
+    return jsonify(result), status_code
+
+@app.route('/api/files/<path:file_path>/rename', methods=['PUT'])
+def rename_file(file_path):
+    """Rename a file or folder"""
+    data = request.get_json()
+    new_name = data.get('new_name', '')
+    
+    if not new_name:
+        return jsonify({'error': 'New name is required'}), 400
+    
+    result, status_code = file_manager.rename_item(file_path, new_name)
+    return jsonify(result), status_code
+
+@app.route('/api/files/<path:file_path>/content', methods=['GET'])
+def get_file_content(file_path):
+    """Get file content for preview"""
+    result, status_code = file_manager.get_file_content(file_path)
+    return jsonify(result), status_code
+
+@app.route('/api/files/<path:file_path>/download', methods=['GET'])
+def download_file(file_path):
+    """Download a file"""
+    try:
+        full_path = file_manager.base_path / file_path
+        if not full_path.exists() or not full_path.is_file():
+            return jsonify({'error': 'File not found'}), 404
+        
+        return send_file(str(full_path), as_attachment=True)
+    except Exception as e:
+        return jsonify({'error': f'Failed to download file: {str(e)}'}), 500
+
+@app.route('/api/files/copy', methods=['POST'])
+def copy_files():
+    """Copy multiple files"""
+    data = request.get_json()
+    files = data.get('files', [])
+    destination = data.get('destination', '')
+    
+    if not files:
+        return jsonify({'error': 'No files specified'}), 400
+    
+    result, status_code = file_manager.copy_files(files, destination)
+    return jsonify(result), status_code
+
+@app.route('/api/files/move', methods=['POST'])
+def move_files():
+    """Move multiple files"""
+    data = request.get_json()
+    files = data.get('files', [])
+    destination = data.get('destination', '')
+    
+    if not files:
+        return jsonify({'error': 'No files specified'}), 400
+    
+    result, status_code = file_manager.move_files(files, destination)
+    return jsonify(result), status_code
+
+@app.route('/api/files/bulk-delete', methods=['POST'])
+def bulk_delete_files():
+    """Delete multiple files"""
+    data = request.get_json()
+    files = data.get('files', [])
+    
+    if not files:
+        return jsonify({'error': 'No files specified'}), 400
+    
+    result, status_code = file_manager.bulk_delete(files)
+    return jsonify(result), status_code
+
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=5001)
+    socketio.run(app, debug=True, host='localhost', port=5001)
