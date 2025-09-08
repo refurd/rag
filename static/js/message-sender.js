@@ -49,12 +49,17 @@ function sendMessage() {
         window.chatFileContext = [];
     }
     
+    // Check RAG toggle state
+    const ragToggle = document.getElementById('rag-toggle');
+    const useRAG = ragToggle ? ragToggle.checked : false;
+    
     // Emit message to server
     socket.emit('send_message', {
         user_id: window.userId,
         message: messageWithContext,
         message_id: userMessageId,
-        file_context: fileContext.length > 0 ? fileContext : null
+        file_context: fileContext.length > 0 ? fileContext : null,
+        use_rag: useRAG
     });
 }
 

@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# RAG Application - User uploads and generated data
+_databricks/uploads/
+_databricks/vector_db/
+sessions/
+*.log

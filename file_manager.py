@@ -257,29 +257,90 @@ class FileManager:
             return {'success': False, 'error': f'Failed to rename item: {str(e)}'}, 500
     
     def get_file_content(self, relative_path):
-        """Get file content for preview (text files only)"""
+        """Get file content for preview (text, PDF, and image files)"""
         try:
             file_path = self.base_path / relative_path
             
             if not file_path.exists() or not file_path.is_file():
                 return {'error': 'File not found'}, 404
             
-            # Only return content for text files under 1MB
-            if file_path.stat().st_size > 1024 * 1024:
-                return {'error': 'File too large for preview'}, 400
-            
+            # Get file extension and mime type
+            extension = file_path.suffix.lower()
             mime_type = mimetypes.guess_type(str(file_path))[0] or ''
-            if not mime_type.startswith('text/'):
-                return {'error': 'File type not supported for preview'}, 400
+            file_info = self.get_file_info(file_path)
             
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                content = f.read()
-            
-            return {
-                'content': content,
-                'mime_type': mime_type,
-                'file': self.get_file_info(file_path)
-            }, 200
+            # Handle different file types
+            if extension in ['.txt', '.md', '.json', '.js', '.css', '.html', '.py', '.java', '.cpp', '.c']:
+                # Text files - read content directly
+                if file_path.stat().st_size > 1024 * 1024:  # 1MB limit for text files
+                    return {'error': 'Text file too large for preview'}, 400
+                
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                
+                return {
+                    'success': True,
+                    'content': content,
+                    'file_type': 'text',
+                    'mime_type': mime_type,
+                    'file_info': file_info
+                }, 200
+                
+            elif extension == '.pdf':
+                # PDF files - try to extract text content if possible
+                try:
+                    # Try to extract text from PDF using PyPDF2 if available
+                    import PyPDF2
+                    with open(file_path, 'rb') as f:
+                        reader = PyPDF2.PdfReader(f)
+                        text_content = ''
+                        for page in reader.pages[:3]:  # Only first 3 pages for preview
+                            text_content += page.extract_text() + '\n'
+                    
+                    return {
+                        'success': True,
+                        'content': text_content.strip(),
+                        'file_type': 'pdf',
+                        'mime_type': mime_type,
+                        'file_info': file_info
+                    }, 200
+                except ImportError:
+                    # PyPDF2 not available, return basic info
+                    return {
+                        'success': True,
+                        'content': None,
+                        'file_type': 'pdf',
+                        'mime_type': mime_type,
+                        'file_info': file_info
+                    }, 200
+                except Exception as pdf_error:
+                    return {
+                        'success': True,
+                        'content': f'PDF text extraction failed: {str(pdf_error)}',
+                        'file_type': 'pdf',
+                        'mime_type': mime_type,
+                        'file_info': file_info
+                    }, 200
+                    
+            elif extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']:
+                # Image files - return basic info (content will be loaded via img src)
+                return {
+                    'success': True,
+                    'content': None,  # Images are loaded via src attribute
+                    'file_type': 'image',
+                    'mime_type': mime_type,
+                    'file_info': file_info
+                }, 200
+                
+            else:
+                # Unsupported file type
+                return {
+                    'success': True,
+                    'content': None,
+                    'file_type': 'unsupported',
+                    'mime_type': mime_type,
+                    'file_info': file_info
+                }, 200
             
         except Exception as e:
             return {'error': f'Failed to read file: {str(e)}'}, 500

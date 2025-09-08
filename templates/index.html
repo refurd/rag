@@ -8,6 +8,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
+    <!-- Permissions Policy to allow unload event -->
+    <meta http-equiv="Permissions-Policy" content="unload=*">
+    
     <title>Alfa AI - Intelligent Assistant</title>
     
     <!-- Preload critical resources -->
@@ -26,6 +29,9 @@
     
     <!-- Prism CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=2025090810">
@@ -72,6 +78,7 @@
     <script src="{{ url_for('static', filename='js/textarea-handler.js') }}"></script>
     <script src="{{ url_for('static', filename='js/simple-drag-drop.js') }}"></script>
     <script src="{{ url_for('static', filename='js/professional-file-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/rag-manager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/profile-panel-manager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chat-ui.js') }}"></script>

@@ -77,6 +77,16 @@ function handleStreamMessage(data) {
             targetMessage.hasEventListeners = true;
         }
         
+        // Display RAG sources if available
+        if (targetMessage && targetMessage.ragSources) {
+            const messageId = targetMessage.dataset.id;
+            if (window.displayRAGSources && messageId) {
+                setTimeout(() => {
+                    window.displayRAGSources(messageId, targetMessage.ragSources);
+                }, 500); // Small delay to ensure content is fully rendered
+            }
+        }
+        
         window.currentAIMessage = null; // Reset for next message
     }
 }
@@ -209,6 +219,34 @@ function handleConnection(data) {
     }
 }
 
+// Handle RAG sources event
+function handleRAGSources(data) {
+    console.log('🔍 RAG sources received:', data);
+    
+    // Find the current AI message (the one being streamed)
+    let targetMessage = window.currentAIMessage;
+    
+    // If no current message, try to find the latest AI message
+    if (!targetMessage) {
+        const allMessages = document.querySelectorAll('[data-role="assistant"]');
+        targetMessage = allMessages[allMessages.length - 1];
+    }
+    
+    if (targetMessage && data.sources && data.sources.length > 0) {
+        const messageId = targetMessage.dataset.id || 'current-ai-message';
+        
+        // Store sources for later display (after streaming completes)
+        targetMessage.ragSources = data.sources;
+        
+        // If streaming is complete, display sources immediately
+        if (!window.isWaitingForResponse) {
+            if (window.displayRAGSources) {
+                window.displayRAGSources(messageId, data.sources);
+            }
+        }
+    }
+}
+
 // Load assistant message from server
 function loadAssistantMessage(msg) {
     const messageDiv = document.createElement('div');
@@ -252,6 +290,9 @@ function loadAssistantMessage(msg) {
                 <!-- Content -->
                 <div class="message-content text-gray-700 leading-relaxed">${window.markdownRenderer ? window.markdownRenderer.render(msg.content) : msg.content}</div>
                 
+                <!-- RAG Sources -->
+                <div class="rag-sources-container hidden mt-4 pt-4 border-t border-gray-200/50"></div>
+                
                 <!-- Edit controls -->
                 <div class="edit-controls hidden mt-4 pt-4 border-t border-gray-200">
                     <div class="flex space-x-2">
@@ -285,6 +326,15 @@ function loadAssistantMessage(msg) {
     }, 100);
     
     setupLoadedMessageEventListeners(messageDiv, msg);
+    
+    // Display RAG sources if they exist in the message data
+    if (msg.rag_sources && msg.rag_sources.length > 0) {
+        setTimeout(() => {
+            if (window.displayRAGSources) {
+                window.displayRAGSources(msg.id, msg.rag_sources);
+            }
+        }, 200); // Small delay to ensure message is fully rendered
+    }
 }
 
 // Setup event listeners for loaded messages

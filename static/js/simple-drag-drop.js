@@ -412,6 +412,18 @@ class SimpleDragDropHandler {
             if (window.addSystemMessage) {
                 const fileNames = Array.from(files).map(f => f.name).join(', ');
                 window.addSystemMessage(`📎 Uploaded: ${fileNames}`);
+                
+                // Suggest RAG processing for supported files
+                const supportedExtensions = ['.pdf', '.txt', '.json', '.md'];
+                const hasRAGSupportedFiles = Array.from(files).some(file => 
+                    supportedExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+                );
+                
+                if (hasRAGSupportedFiles) {
+                    setTimeout(() => {
+                        window.addSystemMessage(`🧠 Tip: Process these documents in the Files panel to enable RAG search!`);
+                    }, 1000);
+                }
             }
             
             // Refresh file manager if open

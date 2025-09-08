@@ -67,6 +67,12 @@ class ProfessionalFileManager {
                         </svg>
                         <span id="selection-mode-text">Select</span>
                     </button>
+                    <button id="rag-process-files-btn" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                        <span id="rag-process-text">Process for RAG</span>
+                    </button>
                 </div>
                 
                 <!-- Search -->
@@ -122,16 +128,64 @@ class ProfessionalFileManager {
                 <span class="hover:text-purple-600 cursor-pointer">Home</span>
             </div>
             
-            <!-- Files List -->
-            <div id="files-list" class="flex-1 overflow-y-auto p-4">
-                <div class="text-center text-gray-500 py-8">
-                    <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                    </svg>
-                    <p>No files yet</p>
-                    <p class="text-sm">Upload files or drag them here</p>
+            <!-- RAG Progress Container (hidden by default) -->
+            <div id="files-rag-progress-container" class="hidden px-4 py-3 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200/50">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-purple-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span class="text-sm font-medium text-purple-700">Processing Documents for RAG</span>
+                    </div>
+                    <span id="files-rag-progress-percentage" class="text-xs text-purple-600 font-medium">0%</span>
+                </div>
+                <div class="bg-white/60 rounded-full h-2 mb-2">
+                    <div id="files-rag-progress-bar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div id="files-rag-progress-text" class="text-xs text-purple-600">
+                    Initializing...
                 </div>
             </div>
+            
+            <!-- Files Container with flexible layout -->
+            <div class="flex-1 flex flex-col" style="height: calc(100vh - 200px); min-height: 400px;">
+                <!-- Files List - scrollable with fixed height -->
+                <div id="files-list" class="overflow-y-auto p-4" style="flex: 1 1 40%; min-height: 150px;">
+                    <div class="text-center text-gray-500 py-8">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        <p>No files yet</p>
+                        <p class="text-sm">Upload files or drag them here</p>
+                    </div>
+                </div>
+                
+                <!-- File Preview Panel - fixed at bottom with full width (60% height) -->
+                <div id="file-preview-panel" class="hidden border-t border-gray-200/50 bg-white/80 backdrop-blur-sm flex flex-col" style="flex: 0 0 80%; min-height: 350px;">
+                    <!-- Preview Header -->
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200/50 flex-shrink-0">
+                        <div class="flex items-center gap-2">
+                            <i id="preview-file-icon" class="fas fa-file text-gray-400"></i>
+                            <span id="preview-file-name" class="text-sm font-medium text-gray-700">No file selected</span>
+                            <span id="preview-file-size" class="text-xs text-gray-500"></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="preview-download-btn" class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="Download">
+                                <i class="fas fa-download text-gray-400 text-sm"></i>
+                            </button>
+                            <button id="preview-close-btn" class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="Close Preview">
+                                <i class="fas fa-times text-gray-400 text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Preview Content - full width and scrollable -->
+                    <div id="file-preview-content" class="flex-1 overflow-y-auto" style="min-height: 0;">
+                        <!-- Preview content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
             
             <!-- Status Bar -->
             <div id="status-bar" class="px-4 py-2 border-t border-gray-200/30 text-xs text-gray-500 bg-gray-50/50">
@@ -185,6 +239,12 @@ class ProfessionalFileManager {
             selectionModeBtn.addEventListener('click', () => this.toggleSelectionMode());
         }
         
+        // RAG Process button
+        const ragProcessBtn = document.getElementById('rag-process-files-btn');
+        if (ragProcessBtn) {
+            ragProcessBtn.addEventListener('click', () => this.processFilesForRAG());
+        }
+        
         // Search
         const searchInput = document.getElementById('files-search');
         if (searchInput) {
@@ -199,6 +259,9 @@ class ProfessionalFileManager {
         
         // Drag and drop on panel
         this.setupDragDrop();
+        
+        // File Preview Panel Event Listeners
+        this.setupPreviewPanelListeners();
     }
     
     setupBulkOperationListeners() {
@@ -326,18 +389,18 @@ toggle() {
 
 open() {
     if (this.isOpen) return;
-    
+
     console.log('📂 Opening files panel...');
-    
+
     // Close profile panel if open
     if (window.profilePanelManager && window.profilePanelManager.isOpen) {
         window.profilePanelManager.close();
     }
-    
+
     // Show panel
     this.filesPanel.classList.remove('translate-x-full');
     this.filesPanel.classList.add('translate-x-0');
-    
+
     // Add body class for CSS-based styling
     document.body.classList.add('files-panel-open');
     
@@ -354,6 +417,11 @@ open() {
         console.log('Initial file load failed, will show empty state');
         this.updateStatus('Ready');
     });
+    
+    // Initialize RAG controls when panel opens
+    if (window.ragManager) {
+        window.ragManager.onFilePanelOpen();
+    }
     
     console.log('✅ Files panel opened');
 }
@@ -499,8 +567,14 @@ open() {
                 if (this.isSelectionMode || e.ctrlKey || e.metaKey || e.shiftKey) {
                     this.toggleFileSelection(filePath, e);
                 } else {
-                    // Normal mode: just clear any existing selection
+                    // Normal mode: clear selection and open preview for files
                     this.clearSelection();
+                    
+                    // Open file preview if it's a file (not folder)
+                    if (item.dataset.type === 'file') {
+                        const fileName = item.querySelector('p').textContent; // Get file name from DOM
+                        this.openFilePreview(fileName, filePath);
+                    }
                 }
             });
             
@@ -592,6 +666,25 @@ open() {
         return `<svg class="w-8 h-8 ${color}" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
         </svg>`;
+    }
+    
+    getFileIconByExtension(extension) {
+        const iconMap = {
+            'pdf': 'fa-file-pdf',
+            'doc': 'fa-file-word', 'docx': 'fa-file-word',
+            'xls': 'fa-file-excel', 'xlsx': 'fa-file-excel',
+            'ppt': 'fa-file-powerpoint', 'pptx': 'fa-file-powerpoint',
+            'txt': 'fa-file-alt', 'md': 'fa-file-alt',
+            'json': 'fa-file-code', 'js': 'fa-file-code', 'css': 'fa-file-code', 'html': 'fa-file-code',
+            'py': 'fa-file-code', 'java': 'fa-file-code', 'cpp': 'fa-file-code', 'c': 'fa-file-code',
+            'jpg': 'fa-file-image', 'jpeg': 'fa-file-image', 'png': 'fa-file-image', 'gif': 'fa-file-image',
+            'bmp': 'fa-file-image', 'webp': 'fa-file-image',
+            'mp4': 'fa-file-video', 'avi': 'fa-file-video', 'mov': 'fa-file-video',
+            'mp3': 'fa-file-audio', 'wav': 'fa-file-audio',
+            'zip': 'fa-file-archive', 'rar': 'fa-file-archive'
+        };
+        
+        return iconMap[extension] || 'fa-file';
     }
     
     formatFileSize(bytes) {
@@ -1243,6 +1336,460 @@ open() {
                     break;
             }
         });
+    }
+    
+    // RAG Processing Methods
+    async processFilesForRAG() {
+        console.log('🧠 Starting RAG processing...');
+        
+        try {
+            // Check if there are RAG-compatible files
+            const ragCompatibleFiles = await this.getRagCompatibleFiles();
+            
+            if (ragCompatibleFiles.length === 0) {
+                this.showNotification('No RAG-compatible files found (PDF, TXT, JSON, MD)', 'warning');
+                return;
+            }
+            
+            // Update button state
+            const ragBtn = document.getElementById('rag-process-files-btn');
+            const ragBtnText = document.getElementById('rag-process-text');
+            
+            if (ragBtn && ragBtnText) {
+                ragBtn.disabled = true;
+                ragBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                ragBtnText.textContent = 'Processing...';
+            }
+            
+            // Show progress container
+            this.showRAGProgress();
+            
+            // Setup progress callback
+            const progressCallback = (progress, status) => {
+                this.updateRAGProgress(progress, status);
+            };
+            
+            // Setup Socket.IO listener for progress updates
+            if (window.socket) {
+                window.socket.on('rag_progress', progressCallback);
+            }
+            
+            // Start processing
+            const response = await fetch('/api/rag/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this.updateRAGProgress(100, 'Processing complete!');
+                this.showNotification(
+                    `Successfully processed ${result.stats.processed_files} files, created ${result.stats.total_chunks} chunks`,
+                    'success'
+                );
+                
+                // Update status
+                this.updateStatus(`RAG: ${result.stats.total_chunks} chunks ready`);
+                
+                // Hide progress after 3 seconds
+                setTimeout(() => {
+                    this.hideRAGProgress();
+                }, 3000);
+                
+            } else {
+                throw new Error(result.error || 'Processing failed');
+            }
+            
+        } catch (error) {
+            console.error('RAG processing error:', error);
+            this.updateRAGProgress(0, 'Processing failed');
+            this.showNotification(`RAG processing failed: ${error.message}`, 'error');
+            
+            // Hide progress after 2 seconds
+            setTimeout(() => {
+                this.hideRAGProgress();
+            }, 2000);
+            
+        } finally {
+            // Reset button state
+            const ragBtn = document.getElementById('rag-process-files-btn');
+            const ragBtnText = document.getElementById('rag-process-text');
+            
+            if (ragBtn && ragBtnText) {
+                ragBtn.disabled = false;
+                ragBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                ragBtnText.textContent = 'Process for RAG';
+            }
+            
+            // Cleanup Socket.IO listener
+            if (window.socket) {
+                window.socket.off('rag_progress');
+            }
+        }
+    }
+    
+    async getRagCompatibleFiles() {
+        try {
+            const response = await fetch('/api/files');
+            const result = await response.json();
+            
+            if (result.success) {
+                const supportedExtensions = ['.pdf', '.txt', '.json', '.md'];
+                return result.files.filter(file => 
+                    supportedExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+                );
+            }
+            return [];
+        } catch (error) {
+            console.error('Failed to get RAG compatible files:', error);
+            return [];
+        }
+    }
+    
+    showRAGProgress() {
+        const progressContainer = document.getElementById('files-rag-progress-container');
+        if (progressContainer) {
+            progressContainer.classList.remove('hidden');
+        }
+    }
+    
+    hideRAGProgress() {
+        const progressContainer = document.getElementById('files-rag-progress-container');
+        if (progressContainer) {
+            progressContainer.classList.add('hidden');
+        }
+    }
+    
+    updateRAGProgress(progress, status) {
+        const progressBar = document.getElementById('files-rag-progress-bar');
+        const progressText = document.getElementById('files-rag-progress-text');
+        const progressPercentage = document.getElementById('files-rag-progress-percentage');
+        
+        if (progressBar) {
+            progressBar.style.width = `${progress}%`;
+        }
+        
+        if (progressText) {
+            progressText.textContent = status;
+        }
+        
+        if (progressPercentage) {
+            progressPercentage.textContent = `${Math.round(progress)}%`;
+        }
+    }
+    
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-20 right-4 z-50 p-4 rounded-xl shadow-lg max-w-sm transform translate-x-full transition-transform duration-300 ${
+            type === 'success' ? 'bg-green-500/90 text-white' :
+            type === 'error' ? 'bg-red-500/90 text-white' :
+            type === 'warning' ? 'bg-yellow-500/90 text-white' :
+            'bg-blue-500/90 text-white'
+        }`;
+        
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas ${
+                    type === 'success' ? 'fa-check-circle' :
+                    type === 'error' ? 'fa-exclamation-circle' :
+                    type === 'warning' ? 'fa-exclamation-triangle' :
+                    'fa-info-circle'
+                } mr-2"></i>
+                <span class="text-sm font-medium">${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(full)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 5000);
+    }
+    
+    // File Preview Panel Methods
+    setupPreviewPanelListeners() {
+        // Close preview button
+        const closeBtn = document.getElementById('preview-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.closePreview());
+        }
+        
+        // Download button
+        const downloadBtn = document.getElementById('preview-download-btn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => this.downloadPreviewFile());
+        }
+    }
+    
+    async openFilePreview(filename, filePath = null) {
+        console.log('📄 Opening file preview for:', filename);
+        
+        try {
+            // Show preview panel
+            const previewPanel = document.getElementById('file-preview-panel');
+            if (previewPanel) {
+                previewPanel.classList.remove('hidden');
+            }
+            
+            // Update header info
+            this.updatePreviewHeader(filename);
+            
+            // Get file content
+            const actualPath = filePath || filename;
+            const response = await fetch(`/api/files/${encodeURIComponent(actualPath)}/content`);
+            
+            if (!response.ok) {
+                throw new Error(`Failed to load file: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Update file size in header if available
+                const sizeElement = document.getElementById('preview-file-size');
+                if (sizeElement && result.file_info) {
+                    sizeElement.textContent = result.file_info.size_formatted || '';
+                }
+                
+                this.displayPreviewContent(filename, result.content, result.file_type);
+            } else {
+                throw new Error(result.error || 'Failed to load file content');
+            }
+            
+        } catch (error) {
+            console.error('Preview error:', error);
+            this.showPreviewError(error.message);
+        }
+    }
+    
+    updatePreviewHeader(filename) {
+        const nameElement = document.getElementById('preview-file-name');
+        const iconElement = document.getElementById('preview-file-icon');
+        const sizeElement = document.getElementById('preview-file-size');
+        
+        if (nameElement) {
+            nameElement.textContent = filename;
+        }
+        
+        if (iconElement) {
+            const extension = filename.split('.').pop().toLowerCase();
+            iconElement.className = `fas ${this.getFileIconByExtension(extension)} text-purple-500`;
+        }
+        
+        // Store current file for download
+        this.currentPreviewFile = filename;
+    }
+    
+    displayPreviewContent(filename, content, fileType) {
+        const contentElement = document.getElementById('file-preview-content');
+        if (!contentElement) return;
+        
+        const extension = filename.split('.').pop().toLowerCase();
+        
+        // Clear previous content
+        contentElement.innerHTML = '';
+        
+        if (['txt', 'md', 'json', 'js', 'css', 'html', 'py', 'java', 'cpp', 'c'].includes(extension)) {
+            // Text-based files
+            this.displayTextContent(contentElement, content, extension);
+        } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension)) {
+            // Image files
+            this.displayImageContent(contentElement, filename);
+        } else if (extension === 'pdf') {
+            // PDF files
+            this.displayPDFContent(contentElement, filename);
+        } else {
+            // Unsupported file type
+            this.displayUnsupportedContent(contentElement, extension);
+        }
+    }
+    
+    displayTextContent(container, content, extension) {
+        // Set container to full height with no padding
+        container.style.height = '100%';
+        container.style.padding = '0';
+        
+        const pre = document.createElement('pre');
+        pre.className = 'whitespace-pre-wrap text-sm text-gray-700 font-mono leading-relaxed';
+        
+        // Force full height with inline styles
+        pre.style.width = '100%';
+        pre.style.height = '100%';
+        pre.style.margin = '0';
+        pre.style.padding = '16px'; // equivalent to p-4
+        pre.style.overflow = 'auto';
+        pre.style.boxSizing = 'border-box';
+        pre.style.minHeight = '100%';
+        
+        // Syntax highlighting for code files
+        if (['js', 'css', 'html', 'py', 'java', 'cpp', 'c', 'json'].includes(extension)) {
+            pre.style.backgroundColor = '#f9fafb'; // bg-gray-50
+            pre.style.border = '1px solid #e5e7eb'; // border-gray-200
+            pre.style.borderRadius = '8px'; // rounded-lg
+        } else {
+            pre.style.backgroundColor = '#ffffff'; // bg-white
+        }
+        
+        pre.textContent = content;
+        container.appendChild(pre);
+    }
+    
+    displayImageContent(container, filename) {
+        // Set container to full height with no padding
+        container.style.height = '100%';
+        container.style.padding = '0';
+        
+        const img = document.createElement('img');
+        img.src = `/api/files/${encodeURIComponent(filename)}/download`;
+        img.className = 'max-w-full max-h-full object-contain mx-auto';
+        img.alt = filename;
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex items-center justify-center w-full h-full';
+        wrapper.style.height = '100%';
+        wrapper.appendChild(img);
+        
+        container.appendChild(wrapper);
+    }
+    
+    displayPDFContent(container, filename) {
+        // Clear container and set full height
+        container.style.height = '100%';
+        container.style.padding = '0';
+        
+        // PDF viewer container - full height
+        const viewerContainer = document.createElement('div');
+        viewerContainer.className = 'w-full h-full bg-gray-100 overflow-hidden';
+        viewerContainer.style.height = '100%';
+        
+        // Create iframe for PDF viewing
+        const iframe = document.createElement('iframe');
+        iframe.className = 'w-full h-full border-0';
+        iframe.src = `/api/files/${encodeURIComponent(filename)}/view#view=FitH`;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        
+        // Add loading indicator
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'absolute inset-0 flex items-center justify-center bg-gray-50';
+        loadingDiv.innerHTML = `
+            <div class="text-center">
+                <i class="fas fa-spinner fa-spin text-red-500 text-2xl mb-2"></i>
+                <p class="text-sm text-gray-600">Loading PDF...</p>
+            </div>
+        `;
+        
+        viewerContainer.style.position = 'relative';
+        viewerContainer.appendChild(loadingDiv);
+        viewerContainer.appendChild(iframe);
+        
+        // Remove loading indicator when iframe loads
+        iframe.onload = () => {
+            setTimeout(() => {
+                if (loadingDiv.parentNode) {
+                    loadingDiv.remove();
+                }
+            }, 500);
+        };
+        
+        // Error handling
+        iframe.onerror = () => {
+            viewerContainer.innerHTML = `
+                <div class="flex items-center justify-center h-full">
+                    <div class="text-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mb-2"></i>
+                        <p class="text-sm text-gray-600 mb-4">Unable to display PDF in browser</p>
+                        <button onclick="window.fileManager.downloadCurrentFile()" 
+                                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                            <i class="fas fa-download mr-2"></i>Download PDF
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+        
+        container.appendChild(viewerContainer);
+    }
+    
+    displayUnsupportedContent(container, extension) {
+        // Set container to full height with no padding
+        container.style.height = '100%';
+        container.style.padding = '0';
+        
+        const unsupported = document.createElement('div');
+        unsupported.className = 'flex items-center justify-center h-full text-center text-gray-500';
+        unsupported.style.height = '100%';
+        unsupported.innerHTML = `
+            <div class="text-center">
+                <i class="fas fa-file text-gray-300 text-3xl mb-4"></i>
+                <p class="mb-2">Preview not available</p>
+                <p class="text-sm text-gray-400 mb-4">File type .${extension} is not supported for preview</p>
+                <button onclick="window.fileManager.downloadCurrentFile()" 
+                        class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">
+                    <i class="fas fa-download mr-2"></i>Download File
+                </button>
+            </div>
+        `;
+        container.appendChild(unsupported);
+    }
+    
+    downloadCurrentFile() {
+        if (this.currentPreviewFile) {
+            const downloadUrl = `/api/files/${encodeURIComponent(this.currentPreviewFile)}/download`;
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = this.currentPreviewFile;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+    
+    showPreviewError(message) {
+        const contentElement = document.getElementById('file-preview-content');
+        if (!contentElement) return;
+        
+        contentElement.innerHTML = `
+            <div class="text-center text-red-500 py-8">
+                <i class="fas fa-exclamation-triangle text-2xl mb-4"></i>
+                <p class="mb-2">Preview Error</p>
+                <p class="text-sm text-gray-600">${message}</p>
+            </div>
+        `;
+    }
+    
+    closePreview() {
+        const previewPanel = document.getElementById('file-preview-panel');
+        if (previewPanel) {
+            previewPanel.classList.add('hidden');
+        }
+        this.currentPreviewFile = null;
+    }
+    
+    downloadPreviewFile() {
+        if (this.currentPreviewFile) {
+            const link = document.createElement('a');
+            link.href = `/api/files/${encodeURIComponent(this.currentPreviewFile)}/download`;
+            link.download = this.currentPreviewFile;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     }
 }
 

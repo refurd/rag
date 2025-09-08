@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import uuid
 from collections import defaultdict
 from file_manager import FileManager
+from rag_manager import get_rag_manager
 
 # Load environment variables
 load_dotenv()
@@ -41,6 +42,9 @@ message_history = defaultdict(list)
 
 # Initialize file manager
 file_manager = FileManager()
+
+# Initialize RAG manager
+rag_manager = get_rag_manager()
 
 @app.route('/')
 def home():
@@ -121,6 +125,7 @@ def handle_message(data):
         message = data.get('message')
         message_id = data.get('message_id')
         regenerate = data.get('regenerate', False)
+        use_rag = data.get('use_rag', False)  # RAG engedélyezése
         
         if not message:
             emit('error', {'message': 'Message cannot be empty'}, room=user_id)
@@ -134,13 +139,41 @@ def handle_message(data):
                 {"role": "system", "content": "You are a helpful assistant that speaks Hungarian."}
             ]
         
+        # RAG context handling
+        rag_context = ""
+        rag_results = None  # Initialize rag_results to None for each request
+        if use_rag and rag_manager and rag_manager.is_ready():
+            try:
+                print(f"🔍 RAG search for message: '{message}'")
+                # Search for relevant documents
+                rag_results = rag_manager.search_documents(message, top_k=3)
+                print(f"🔍 RAG search returned {len(rag_results) if rag_results else 0} results")
+                if rag_results:
+                    rag_context = "\n\nRelevant information from documents:\n"
+                    for i, result in enumerate(rag_results[:3], 1):
+                        rag_context += f"\n{i}. From {result['source']}:\n{result['content'][:500]}...\n"
+                    
+                    # Emit RAG sources to frontend
+                    emit('rag_sources', {
+                        'sources': [{
+                            'source': result['source'],
+                            'content': result['content'][:200] + '...',
+                            'relevance_score': result['relevance_score']
+                        } for result in rag_results]
+                    }, room=user_id)
+            except Exception as e:
+                print(f"RAG search error: {e}")
+                emit('rag_error', {'message': f'RAG search failed: {str(e)}'}, room=user_id)
+        
         # If this is a regeneration, remove the last assistant message if it exists
         if regenerate and conversations[user_id] and conversations[user_id][-1]["role"] == "assistant":
             conversations[user_id].pop()
         
         # Add user message to conversation history
         if not regenerate:
-            user_message = {"role": "user", "content": message}
+            # Add RAG context to the message if available
+            enhanced_message = message + rag_context if rag_context else message
+            user_message = {"role": "user", "content": enhanced_message}
             conversations[user_id].append(user_message)
             
             # Add to message history with ID
@@ -192,13 +225,26 @@ def handle_message(data):
             if assistant_response:
                 conversations[user_id].append({"role": "assistant", "content": assistant_response})
                 
-                # Add to message history
-                message_history[user_id].append({
+                # Add to message history with RAG sources if available
+                message_data = {
                     'id': response_id,
                     'role': 'assistant',
                     'content': assistant_response,
                     'edited': False
-                })
+                }
+                
+                # Add RAG sources if they exist
+                if rag_results is not None and rag_results:
+                    print(f"💾 Storing RAG sources for message {response_id}: {[r['source'] for r in rag_results]}")
+                    message_data['rag_sources'] = [{
+                        'source': result['source'],
+                        'content': result['content'][:200] + '...',
+                        'relevance_score': result['relevance_score']
+                    } for result in rag_results]
+                else:
+                    print(f"💾 No RAG sources to store for message {response_id}")
+                
+                message_history[user_id].append(message_data)
                 
                 emit('stream', {
                     'message_id': response_id,
@@ -340,6 +386,19 @@ def download_file(file_path):
     except Exception as e:
         return jsonify({'error': f'Failed to download file: {str(e)}'}), 500
 
+@app.route('/api/files/<path:file_path>/view', methods=['GET'])
+def view_file(file_path):
+    """View a file inline (for PDF preview)"""
+    try:
+        full_path = file_manager.base_path / file_path
+        if not full_path.exists() or not full_path.is_file():
+            return jsonify({'error': 'File not found'}), 404
+        
+        # Send file inline (not as attachment) for preview
+        return send_file(str(full_path), as_attachment=False)
+    except Exception as e:
+        return jsonify({'error': f'Failed to view file: {str(e)}'}), 500
+
 @app.route('/api/files/copy', methods=['POST'])
 def copy_files():
     """Copy multiple files"""
@@ -377,6 +436,96 @@ def bulk_delete_files():
     
     result, status_code = file_manager.bulk_delete(files)
     return jsonify(result), status_code
+
+# RAG API Endpoints
+@app.route('/api/rag/process', methods=['POST'])
+def process_documents():
+    """Process all documents in uploads directory for RAG"""
+    try:
+        if not rag_manager:
+            return jsonify({"error": "RAG system not available"}), 500
+        
+        # Process documents with progress tracking
+        progress_data = {"progress": 0, "status": "Starting..."}
+        
+        def progress_callback(progress, status):
+            progress_data["progress"] = progress
+            progress_data["status"] = status
+            # Emit progress to all connected clients
+            socketio.emit('rag_progress', progress_data)
+        
+        stats = rag_manager.process_documents(progress_callback)
+        
+        return jsonify({
+            "success": True,
+            "message": "Documents processed successfully",
+            "stats": stats
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/rag/search', methods=['POST'])
+def search_documents():
+    """Search documents using RAG"""
+    try:
+        if not rag_manager:
+            return jsonify({"error": "RAG system not available"}), 500
+        
+        data = request.get_json()
+        query = data.get('query', '')
+        top_k = data.get('top_k', 5)
+        
+        if not query:
+            return jsonify({"error": "Query is required"}), 400
+        
+        results = rag_manager.search_documents(query, top_k)
+        
+        return jsonify({
+            "success": True,
+            "query": query,
+            "results": results
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/rag/stats', methods=['GET'])
+def get_rag_stats():
+    """Get RAG database statistics"""
+    try:
+        if not rag_manager:
+            return jsonify({"error": "RAG system not available"}), 500
+        
+        stats = rag_manager.get_database_stats()
+        
+        return jsonify({
+            "success": True,
+            "stats": stats
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/rag/clear', methods=['POST'])
+def clear_rag_database():
+    """Clear RAG database"""
+    try:
+        if not rag_manager:
+            return jsonify({"error": "RAG system not available"}), 500
+        
+        success = rag_manager.clear_database()
+        
+        if success:
+            return jsonify({
+                "success": True,
+                "message": "Database cleared successfully"
+            })
+        else:
+            return jsonify({"error": "Failed to clear database"}), 500
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host='localhost', port=5001)

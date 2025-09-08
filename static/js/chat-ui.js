@@ -52,6 +52,9 @@ function addMessage(role, content, messageId = null) {
                 <!-- Content -->
                 <div class="message-content ${isUser ? 'text-white' : 'text-gray-700'} leading-relaxed">${isUser ? content : (window.markdownRenderer ? window.markdownRenderer.render(content) : content)}</div>
                 
+                <!-- RAG Sources (only for AI messages) -->
+                ${!isUser ? '<div class="rag-sources-container hidden mt-4 pt-4 border-t border-gray-200/50"></div>' : ''}
+                
                 <!-- Edit controls -->
                 <div class="edit-controls hidden mt-4 pt-4 border-t ${isUser ? 'border-white/20' : 'border-gray-200'}">
                     <div class="flex space-x-2">
@@ -241,6 +244,21 @@ function addSystemMessage(message) {
         systemMessageDiv.classList.add('revealed');
     }, 100);
     
+    // Auto-remove system message after 5 seconds
+    setTimeout(() => {
+        if (systemMessageDiv.parentNode) {
+            systemMessageDiv.style.opacity = '0';
+            systemMessageDiv.style.transform = 'translateY(-10px)';
+            systemMessageDiv.style.transition = 'all 0.3s ease';
+            
+            setTimeout(() => {
+                if (systemMessageDiv.parentNode) {
+                    systemMessageDiv.remove();
+                }
+            }, 300);
+        }
+    }, 5000);
+    
     // Scroll to bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -290,6 +308,9 @@ function createAIMessageContainer() {
                 <!-- Content -->
                 <div id="ai-response" class="text-gray-700 leading-relaxed min-h-[1.5rem]"></div>
                 
+                <!-- RAG Sources -->
+                <div class="rag-sources-container hidden mt-4 pt-4 border-t border-gray-200/50"></div>
+                
                 <!-- Edit controls -->
                 <div class="edit-controls hidden mt-4 pt-4 border-t border-gray-200">
                     <div class="flex space-x-2">
@@ -335,3 +356,164 @@ function showErrorMessage(errorText) {
 function clearAllMessages() {
     document.querySelectorAll('.message').forEach(el => el.remove());
 }
+
+// Display RAG sources for a message
+function displayRAGSources(messageId, sources) {
+    console.log('🔍 Displaying RAG sources for message:', messageId, sources);
+    
+    // Find the message by ID
+    const messageElement = document.querySelector(`[data-id="${messageId}"]`);
+    if (!messageElement) {
+        console.error('Message element not found for ID:', messageId);
+        return;
+    }
+    
+    // Find the RAG sources container
+    const sourcesContainer = messageElement.querySelector('.rag-sources-container');
+    if (!sourcesContainer) {
+        console.error('RAG sources container not found in message');
+        return;
+    }
+    
+    // Create sources HTML
+    const sourcesHTML = `
+        <div class="rag-sources">
+            <div class="flex items-center mb-3">
+                <i class="fas fa-book-open text-purple-500 mr-2"></i>
+                <span class="text-sm font-medium text-gray-600">Sources used:</span>
+            </div>
+            <div class="space-y-2">
+                ${sources.map((source, index) => `
+                    <div class="rag-source-item bg-gray-50/80 backdrop-blur-sm rounded-lg p-3 border border-gray-200/50 hover:bg-gray-100/80 transition-colors group">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-1">
+                                    <i class="fas fa-file-alt text-gray-400 mr-2 text-xs"></i>
+                                    <span class="text-sm font-medium text-gray-700 hover:text-purple-600 transition-colors cursor-pointer" 
+                                          onclick="openFilePreview('${source.source}')" 
+                                          title="Click to preview file">
+                                        ${source.source}
+                                    </span>
+                                    <span class="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full">
+                                        ${Math.round(source.relevance_score * 100)}% match
+                                    </span>
+                                </div>
+                                <p class="text-xs text-gray-600 leading-relaxed line-clamp-2">
+                                    ${source.content}
+                                </p>
+                            </div>
+                            <button class="opacity-0 group-hover:opacity-100 ml-3 p-1 hover:bg-gray-200 rounded transition-all" 
+                                    onclick="copySourceContent('${source.content.replace(/'/g, "\\'")}')"
+                                    title="Copy source content">
+                                <i class="fas fa-copy text-gray-400 text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    // Insert the sources HTML
+    sourcesContainer.innerHTML = sourcesHTML;
+    sourcesContainer.classList.remove('hidden');
+    
+    // Add smooth reveal animation
+    setTimeout(() => {
+        sourcesContainer.style.opacity = '0';
+        sourcesContainer.style.transform = 'translateY(10px)';
+        sourcesContainer.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        
+        requestAnimationFrame(() => {
+            sourcesContainer.style.opacity = '1';
+            sourcesContainer.style.transform = 'translateY(0)';
+        });
+    }, 100);
+}
+
+// Open file preview using the file manager
+function openFilePreview(filename) {
+    console.log('📄 Opening file preview for:', filename);
+    
+    // Check if file manager exists and open it
+    if (window.fileManager) {
+        // Open files panel if not already open
+        if (!window.fileManager.isOpen) {
+            window.fileManager.open();
+        }
+        
+        // Open file preview
+        setTimeout(() => {
+            window.fileManager.openFilePreview(filename);
+        }, 300); // Small delay to ensure panel is open
+        
+    } else {
+        // Fallback notification if file manager not available
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-20 right-4 z-50 p-4 rounded-xl shadow-lg max-w-sm bg-blue-500/90 text-white transform translate-x-full transition-transform duration-300';
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-info-circle mr-2"></i>
+                <span class="text-sm font-medium">File preview: ${filename}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 3000);
+    }
+}
+
+// Copy source content to clipboard
+function copySourceContent(content) {
+    navigator.clipboard.writeText(content).then(() => {
+        console.log('📋 Source content copied to clipboard');
+        
+        // Show success notification
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-20 right-4 z-50 p-4 rounded-xl shadow-lg max-w-sm bg-green-500/90 text-white transform translate-x-full transition-transform duration-300';
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span class="text-sm font-medium">Source content copied!</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Auto remove after 2 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy source content:', err);
+    });
+}
+
+// Make functions globally available
+window.displayRAGSources = displayRAGSources;
+window.openFilePreview = openFilePreview;
+window.copySourceContent = copySourceContent;

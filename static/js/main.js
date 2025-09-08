@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     socket.on('message_updated', handleMessageUpdate);
     socket.on('connected', handleConnection);
     socket.on('error', handleError);
+    socket.on('rag_sources', handleRAGSources);
     
     // Initialize message sender
     initializeMessageSender();
