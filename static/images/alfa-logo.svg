@@ -1,0 +1,10 @@
+<svg width="120" height="60" viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- ALFA text in purple -->
+  <text x="60" y="25" text-anchor="middle" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#8b5cf6">ALFA</text>
+  
+  <!-- Red line under ALFA -->
+  <line x1="20" y1="32" x2="100" y2="32" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Small black text under red line -->
+  <text x="60" y="45" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#1f2937">AI Assistant</text>
+</svg>

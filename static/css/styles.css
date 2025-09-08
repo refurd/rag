@@ -1,0 +1,273 @@
+/* Modern 2025 Design System */
+:root {
+    --primary-purple: #8b5cf6;
+    --primary-purple-light: #a78bfa;
+    --primary-purple-dark: #7c3aed;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --border-radius: 16px;
+    --border-radius-lg: 24px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Message animations */
+.message {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    animation: messageSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes messageSlideIn {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Markdown and Code Block Styles */
+.message-content {
+    line-height: 1.6;
+}
+
+.message-content h1, .message-content h2, .message-content h3, 
+.message-content h4, .message-content h5, .message-content h6 {
+    margin: 1rem 0 0.5rem 0;
+    font-weight: 600;
+    color: #374151;
+}
+
+.message-content h1 { font-size: 1.5rem; }
+.message-content h2 { font-size: 1.25rem; }
+.message-content h3 { font-size: 1.125rem; }
+
+.message-content p {
+    margin: 0.5rem 0;
+}
+
+.message-content ul, .message-content ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.message-content li {
+    margin: 0.25rem 0;
+}
+
+.message-content strong {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.message-content em {
+    font-style: italic;
+    color: #4b5563;
+}
+
+.inline-code {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 0.875em;
+    font-weight: 500;
+}
+
+.code-block-container {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.code-block-container pre {
+    margin: 0;
+    padding: 1rem;
+    background: #1a1a1a;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    overflow-x: auto;
+}
+
+.code-block-container code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    color: #e5e7eb;
+}
+
+.copy-btn {
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+    background-color: rgba(55, 65, 81, 0.5);
+}
+
+.table-container {
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+}
+
+.table-container table {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+/* Dark mode support for code blocks */
+@media (prefers-color-scheme: dark) {
+    .message-content h1, .message-content h2, .message-content h3, 
+    .message-content h4, .message-content h5, .message-content h6 {
+        color: #f3f4f6;
+    }
+    
+    .message-content strong {
+        color: #f9fafb;
+    }
+    
+    .inline-code {
+        background: #374151;
+        color: #f3f4f6;
+    }
+}
+
+/* Floating copy button */
+.floating-copy-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+    z-index: 50;
+}
+
+.floating-copy-btn:hover {
+    transform: scale(1.05);
+}
+
+.floating-copy-btn .bg-white\/95 {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .code-block-container pre {
+        font-size: 0.8rem;
+        padding: 0.75rem;
+    }
+    
+    .table-container {
+        font-size: 0.875rem;
+    }
+    
+    .floating-copy-btn {
+        right: 10px !important;
+        top: 80px !important;
+    }
+}
+
+/* Scroll-triggered animations */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: var(--transition);
+}
+
+.scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Organic shapes and glassmorphism */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Hover effects */
+.hover-lift {
+    transition: var(--transition);
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* Focus states */
+.focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gray-300);
+    border-radius: 3px;
+    transition: var(--transition);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-purple);
+}
+
+/* Message hover effects for button visibility */
+.message:hover .opacity-0 {
+    opacity: 1;
+}
+
+.message .edit-btn,
+.message .delete-btn,
+.message .regenerate-btn {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.message:hover .edit-btn,
+.message:hover .delete-btn,
+.message:hover .regenerate-btn {
+    opacity: 1;
+}
+
+/* Performance optimizations */
+.gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
