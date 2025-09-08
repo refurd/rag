@@ -211,3 +211,4 @@ _databricks/uploads/
 _databricks/vector_db/
 sessions/
 *.log
+sessions/*
